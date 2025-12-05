@@ -1,8 +1,3 @@
-import colorama
-from colorama import Fore
-
-colorama.init()
-
 import stat
 import zlib
 import base64
@@ -20,6 +15,8 @@ import vdf
 from jwt_helper import verify_steam_jwt
 
 
+# a set of features that I shamelessly stole ( sorry orig authors shame on me )
+
 def get_steam_install_path():
     steam_pid = get_pid('steam.exe')
     if steam_pid != 0:
@@ -36,7 +33,7 @@ def get_steam_install_path():
 def get_local_vdf_path():
     app_data_path = os.getenv('localappdata')
     if app_data_path is None:
-        print(Fore.RED +"Failed to get localappdata environment variable.")
+        print("Failed to get localappdata environment variable.")
     return os.path.join(app_data_path, 'Steam', 'local.vdf')
 
 def steam_decrypt(encrypted_hex_data):
@@ -79,7 +76,7 @@ def compute_crc32(data):
 def parse_eya(eya):
     token_arr = eya.split('.')
     if len(token_arr) != 3:
-        print(Fore.RED +"Error:Invalid token!")
+        print("Error:Invalid token!")
         return None
     padding = len(token_arr[1]) % 4
     if padding != 0:
@@ -181,7 +178,7 @@ def reset_steam():
     if os.path.exists(local_vdf_path):
         os.remove(local_vdf_path)
     subprocess.Popen(os.path.join(path, 'steam.exe'), shell=True)
-    print(Fore.GREEN +"Reset Completed:Steam has been reset successfully.")
+    print("Reset Completed:Steam has been reset successfully.")
 
 def login_game(eya, account_name):
     if '@' in account_name:
@@ -221,14 +218,14 @@ def login_game(eya, account_name):
     with open(local_vdf_path, 'w', encoding='utf-8') as f:
         f.write(local)
     subprocess.Popen(os.path.join(path, 'steam.exe'), shell=True)
-    print(Fore.GREEN +"Login attempt. " + Fore.RED+  "If you are redirected to the account selection page, the token has expired. If the login window appears, enter the token again. "+Fore.GREEN )
+    print( "Login attempt. " +  "If you are redirected to the account selection page, the token has expired. If the login window appears, enter the token again. ")
 
 def on_login(user_input):
     user_input = user_input.replace('EyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0', 'eyAidHlwIjogIkpXVCIsICJhbGciOiAiRWREU0EiIH0')
     user_input = user_input.replace(' ', '').replace('\n', '').replace('\r', '')
     text = user_input.split('----')
     if len(text) < 2:
-        print(Fore.RED + "Error:Invalid input format. You should include the account name and eyA token separated by '----'.")
+        print("Error:Invalid input format. You should include the account name and eyA token separated by '----'.")
         return
     eya = ""
     account_name = ""
@@ -240,18 +237,16 @@ def on_login(user_input):
     if eya != "":
         expire_time = verify_steam_jwt(eya)
         if expire_time is False:
-            print(Fore.RED + "Error:Invalid token. Please confirm you have entered the correct account key.")
+            print( "Error:Invalid token. Please confirm you have entered the correct account key.")
         elif expire_time < 0:
-            print(Fore.RED + "Error:eyA token has expired.")
+            print("Error:eyA token has expired.")
         else:
             login_game(eya, account_name)
             days = expire_time // 86400
             hours = (expire_time % 86400) // 3600
             minutes = (expire_time % 3600) // 60
-            seconds = expire_time % 60
-            print(Fore.GREEN +"Token Valid:"f"Token is valid for {days} days, {hours} hours, {minutes} minutes, and {seconds} seconds.")
+            #seconds = expire_time % 60 - secnds are useless
+            print(f"Token is valid for {days}d, {hours}h, {minutes}m")
     else:
-        print(Fore.RED + "Error:Invalid input format.")
-
-
+        print("Error:Invalid input format.")
 

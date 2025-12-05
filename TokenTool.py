@@ -1,6 +1,9 @@
 import colorama
+
 from colorama import Fore
 from TokenInsert import *
+
+colorama.init()
 
 def init():
     user_input= input(Fore.GREEN + "Input:" + Fore.CYAN)
