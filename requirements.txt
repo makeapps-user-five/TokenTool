@@ -1,0 +1,9 @@
+pillow
+win32gui
+pyautogui
+pyzbar
+psutil
+pywin32
+PyJWT
+vdf
+colorama
