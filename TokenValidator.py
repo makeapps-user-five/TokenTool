@@ -8,7 +8,10 @@ import sqlite3
 import win32gui
 import win32process
 import psutil
+import configparser
 
+cfg = configparser.ConfigParser()
+cfg.read('validator.ini')
 
 conn = sqlite3.connect('data.db')
 cursor = conn.cursor()
@@ -32,16 +35,20 @@ def add_data(token, state):
 
 #return T-F
 def qr_check():
-    screenshot = pyautogui.screenshot()
-    screenshot.save('screen.png')
-    img = Image.open('screen.png')
-    qrs = decode(img)
-    if qrs:
-        print("Найдены QR-коды:", [qr.data.decode() for qr in qrs])
-        return True
+    if cfg.getboolean('validator', 'CheckQR'):
+        screenshot = pyautogui.screenshot()
+        screenshot.save('screen.png')
+        img = Image.open('screen.png')
+        qrs = decode(img)
+        if qrs:
+            print("QR found:", [qr.data.decode() for qr in qrs])
+            return True
+        else:
+            print("QR not found")  # Проверка наличия QR [web:22]
+            return False
     else:
-        print("QR-коды не найдены")  # Проверка наличия QR [web:22]
         return False
+
 
 #callback uses in get_steam_result()
 def enum_windows_steam_callback(hwnd, ctx):
@@ -80,13 +87,13 @@ def get_steam_result():
     return False
 
 #not instant func to check token valid
-def check_with_timeout(check_func, timeout=15):
+def check_with_timeout(check_func, timeout=cfg.getint('validator', 'CheckTokenTime', fallback=60)):
     for i in range(timeout):
         if check_func():
-            print(f'check success in {i}s')
+            print(f'check success in {i+1}s')
             return "valid"
         time.sleep(1)
-        print(f'check failed with timeout {i}')
+        print(f'check failed with timeout {i+1}')
     if qr_check():
         return "need review"
     else:
@@ -103,7 +110,7 @@ if lines:
     for line in lines:  # ← line = current line in file
         line_num += 1
         on_login(line)
-        sleep(10)
+        sleep(cfg.getint('validator', 'SleepBeforeCheck', fallback=60))
         result = check_with_timeout(get_steam_result)
         if result == 'valid':
             print(f'{line} valid')
@@ -111,7 +118,7 @@ if lines:
         elif result == 'need review':
             print(f'{line} need review')
             add_data(line, 'need review')
-        else:
+        elif cfg.getboolean('validator', 'SaveRES'):
             add_data(line, 'RES')
             print(f'{line} RES')
 else:
