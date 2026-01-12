@@ -14,5 +14,5 @@ def init():
         on_login(user_input)
     init()
 
-print(Fore.GREEN + 'Select the desired option:\ntype "r" or "reset" to reset the main service. \nInsert the authorization token to log in to your account.\n'+ Fore.YELLOW +"buy tokens - skittens.mysellauth.com")
+print(Fore.GREEN + 'Select the desired option:\ntype "r" or "reset" to reset the main service. \nInsert the authorization token to log in to your account.\n'+ Fore.YELLOW +"buy tokens - skittens.store")
 init()

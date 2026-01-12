@@ -28,7 +28,7 @@ def add_data(token, state):
     global cursor
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO data (token, state) 
+        INSERT OR IGNORE INTO data (token, state) 
         VALUES (?, ?)
     ''', (token, state))
     conn.commit()
